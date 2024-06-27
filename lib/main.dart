@@ -1,14 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:hive/hive.dart';
+import 'hive_setup.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:intl/intl.dart';
+
 import 'sleep_page.dart';
 import 'work_page.dart';
 import 'play_page.dart';
-import 'other_page.dart';
-import 'profile_page.dart';
 import 'notification_page.dart';
+import 'Profile_Page.dart';
+import 'other_page.dart';
+import 'login_page.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize path_provider
+  await initPathProvider();
+
+  // Initialize Hive
+  await HiveSetup.init();
+
   runApp(MyApp());
+}
+
+Future<void> initPathProvider() async {
+  await getApplicationDocumentsDirectory();
 }
 
 class MyApp extends StatelessWidget {
@@ -17,7 +35,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: const HomePage(),
+      home: const LoginPage(),
       theme: ThemeData(
         primarySwatch: Colors.blue,
         elevatedButtonTheme: ElevatedButtonThemeData(
@@ -39,6 +57,18 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        title: Row(
+          children: [
+            Text(
+              'Home',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+          ],
+        ),
         backgroundColor: Colors.white,
         actions: [
           IconButton(
@@ -46,10 +76,9 @@ class HomePage extends StatelessWidget {
             padding: EdgeInsets.all(8.0),
             alignment: Alignment.center,
             splashRadius: 24.0,
-            color: Colors.black,
+            color: Color.fromARGB(255, 6, 116, 219),
             icon: Icon(Icons.notifications),
             onPressed: () {
-              // Navigate to NotificationPage
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => NotificationPage()),
@@ -61,10 +90,9 @@ class HomePage extends StatelessWidget {
             padding: EdgeInsets.all(8.0),
             alignment: Alignment.center,
             splashRadius: 24.0,
-            color: Colors.black,
+            color: Color.fromARGB(255, 6, 116, 219),
             icon: Icon(Icons.account_circle),
             onPressed: () {
-              // Navigate to ProfilePage
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => ProfilePage()),
@@ -73,110 +101,118 @@ class HomePage extends StatelessWidget {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Text(
-                  'Home',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 16),
+              CarouselSlider(
+                items: [
+                  PlaceholderBox(
+                    text: 'Time: ${getCurrentTime()}',
+                    boxWidth: 250,
+                  ),
+                  PlaceholderBox(
+                    text: 'Recreation',
+                    boxWidth: 250,
+                    icon: Icons.sports,
+                    onTap: () {
+                      // Add your navigation logic for 'Recreation' here
+                    },
+                  ),
+                  PlaceholderBox(
+                    text: 'Productivity',
+                    boxWidth: 250,
+                    icon: Icons.work,
+                    onTap: () {
+                      // Add your navigation logic for 'Productivity' here
+                    },
+                  ),
+                  PlaceholderBox(
+                    text: 'Rest',
+                    boxWidth: 250,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => SleepPage()),
+                      );
+                    },
+                    icon: Icons.night_shelter,
+                  ),
+                ],
+                options: CarouselOptions(
+                  height: 100.0,
+                  autoPlay: true,
+                  autoPlayInterval: Duration(seconds: 3),
+                  autoPlayAnimationDuration: Duration(milliseconds: 800),
+                  autoPlayCurve: Curves.fastOutSlowIn,
+                  pauseAutoPlayOnTouch: true,
+                  viewportFraction: 1.0,
+                ),
+              ),
+              const SizedBox(height: 14),
+              GestureDetector(
+                onTap: () {},
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 53),
+                  child: Image.asset(
+                    'lib/assets/home1.jpg',
+                    width: 250, // Set the desired width
+                    height: 200,
+                    fit: BoxFit.cover,
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            CarouselSlider(
-              items: [
-                PlaceholderBox(
-                  text: 'Time: 12:00 PM',
-                  boxWidth: 250,
-                ),
-                PlaceholderBox(
-                  text: 'Fun',
-                  boxWidth: 250,
-                ),
-                PlaceholderBox(
-                  text: 'Work',
-                  boxWidth: 250,
-                ),
-                PlaceholderBox(
-                  text: 'Sleep',
-                  boxWidth: 250,
-                  onTap: () {
-                    // Navigate to SleepPage
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => SleepPage()),
-                    );
-                  },
-                ),
-                PlaceholderBox(
-                  text: 'Study',
-                  boxWidth: 250,
-                ),
-              ],
-              options: CarouselOptions(
-                height: 100.0,
-                autoPlay: true,
-                autoPlayInterval: Duration(seconds: 3),
-                autoPlayAnimationDuration: Duration(milliseconds: 800),
-                autoPlayCurve: Curves.fastOutSlowIn,
-                pauseAutoPlayOnTouch: true,
-                viewportFraction: 1.0, // Display one item at a time
               ),
-            ),
-            const SizedBox(height: 16),
-            GestureDetector(
-              onTap: () {
-                // Handle the onTap action for the interactive image
-              },
-              child: Image.asset(
-                'lib/assets/0511.png_860.png', // Replace with your image asset path
-                width: 320,
-                height: 180,
-                fit: BoxFit.cover,
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  CategoryBox(title: 'Rest', boxWidth: 150, boxHeight: 120, icon: Icons.night_shelter),
+                  CategoryBox(title: 'Productivity', boxWidth: 150, boxHeight: 120, icon: Icons.work),
+                ],
               ),
-            ),
-            const SizedBox(height: 36),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                CategoryBox(title: 'Sleep', boxWidth: 120, boxHeight: 100),
-                CategoryBox(title: 'Work', boxWidth: 120, boxHeight: 100),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                CategoryBox(title: 'Play', boxWidth: 120, boxHeight: 100),
-                CategoryBox(title: 'Other', boxWidth: 120, boxHeight: 100),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: Container(
-                alignment: Alignment.bottomCenter,
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  CategoryBox(title: 'Recreation', boxWidth: 150, boxHeight: 120, icon: Icons.sports),
+                  CategoryBox(title: 'Info', boxWidth: 150, boxHeight: 120, icon: Icons.info),
+                ],
+              ),
+              const SizedBox(height: 33),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(color: Colors.blue, width: 2),
+                    //bottom: BorderSide(color: Colors.blue, width: 2),
+                    left: BorderSide(color: Colors.blue, width: 2),
+                    right: BorderSide(color: Colors.blue, width: 2),
+                  ),
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: const [
                     BottomNavItem(icon: Icons.home, label: 'Home'),
                     BottomNavItem(icon: Icons.account_circle, label: 'Profile'),
                     BottomNavItem(icon: Icons.night_shelter, label: 'Sleep'),
-                    BottomNavItem(icon: Icons.category, label: 'Other'),
+                    BottomNavItem(icon: Icons.info, label: 'Info'),
                   ],
                 ),
+                
               ),
-            ),
-          ],
+              
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  String getCurrentTime() {
+    final currentTime = DateTime.now();
+    return DateFormat.jm().format(currentTime);
   }
 }
 
@@ -184,11 +220,13 @@ class PlaceholderBox extends StatelessWidget {
   final String text;
   final double boxWidth;
   final VoidCallback? onTap;
+  final IconData? icon;
 
   const PlaceholderBox({
     required this.text,
     this.boxWidth = 200.0,
     this.onTap,
+    this.icon,
     Key? key,
   }) : super(key: key);
 
@@ -200,19 +238,32 @@ class PlaceholderBox extends StatelessWidget {
         width: boxWidth,
         height: 80,
         decoration: BoxDecoration(
-          color: Colors.blue,
+          color: text == 'Time: ${getCurrentTime()}' ? Color.fromARGB(255, 6, 116, 219) : Color.fromARGB(255, 6, 116, 219),
           borderRadius: BorderRadius.circular(15),
         ),
-        child: Center(
-          child: Text(
-            text,
-            style: const TextStyle(color: Colors.white),
-            overflow: TextOverflow.ellipsis,
-            maxLines: 1,
-          ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (icon != null) Icon(icon, color: Colors.white),
+            SizedBox(height: 8),
+            Text(
+              text,
+              style: const TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+          ],
         ),
       ),
     );
+  }
+
+  String getCurrentTime() {
+    final currentTime = DateTime.now();
+    return DateFormat.jm().format(currentTime);
   }
 }
 
@@ -220,11 +271,13 @@ class CategoryBox extends StatelessWidget {
   final String title;
   final double boxWidth;
   final double boxHeight;
+  final IconData icon;
 
   const CategoryBox({
     required this.title,
     this.boxWidth = 150,
     this.boxHeight = 120,
+    required this.icon,
     Key? key,
   }) : super(key: key);
 
@@ -232,27 +285,22 @@ class CategoryBox extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // Handle category box press
-        if (title == 'Sleep') {
-          // Navigate to SleepPage
+        if (title == 'Rest') {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => SleepPage()),
           );
-        } else if (title == 'Work') {
-          // Navigate to WorkPage
+        } else if (title == 'Productivity') {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => WorkPage()),
           );
-        } else if (title == 'Play') {
-          // Navigate to PlayPage
+        } else if (title == 'Recreation') {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => PlayPage()),
           );
-        } else if (title == 'Other') {
-          // Navigate to OtherPage
+        } else if (title == 'Info') {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => OtherPage()),
@@ -263,14 +311,22 @@ class CategoryBox extends StatelessWidget {
         width: boxWidth,
         height: boxHeight,
         decoration: BoxDecoration(
-          color: Colors.blue,
+          color: Color.fromARGB(255, 6, 116, 219),
           borderRadius: BorderRadius.circular(15),
         ),
-        child: Center(
-          child: Text(
-            title,
-            style: const TextStyle(color: Colors.white),
-          ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: Colors.white),
+            SizedBox(height: 8),
+            Text(
+              title,
+              style: const TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -290,24 +346,20 @@ class BottomNavItem extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton(
-          icon: Icon(icon),
+          icon: Icon(icon, color: Color.fromARGB(255, 6, 116, 219)),
           iconSize: 24.0,
           onPressed: () {
-            // Handle bottom navigation item press
             if (label == 'Profile') {
-              // Navigate to ProfilePage
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => ProfilePage()),
               );
             } else if (label == 'Sleep') {
-              // Navigate to SleepPage
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => SleepPage()),
               );
-            } else if (label == 'Other') {
-              // Navigate to OtherPage
+            } else if (label == 'Info') {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => OtherPage()),
@@ -315,7 +367,13 @@ class BottomNavItem extends StatelessWidget {
             }
           },
         ),
-        Text(label),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ],
     );
   }
